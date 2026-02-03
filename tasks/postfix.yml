@@ -1,0 +1,98 @@
+# Copyright (C) 2024 Eternilab <support@eternilab.com>
+#
+# SPDX-License-Identifier: CECILL-2.1
+---
+- name: "Be sure postfix is installed (APT based)"
+  ansible.builtin.apt:
+    pkg: 'postfix'
+    state: present
+  become: true
+  when: ansible_pkg_mgr == 'apt'
+  tags:
+    - install
+
+- name: "Be sure spool directory exists : {{ postfix_spool_dir }}"
+  ansible.builtin.file:
+    name: "{{ postfix_spool_dir }}"
+    owner: root
+    group: "{{ root_group }}"
+    mode: '0755'
+    recurse: false
+    state: directory
+  become: true
+  notify:
+    - Restart postfix
+  tags:
+    - conf
+
+- name: "Set up /etc/mailname for Debian"
+  ansible.builtin.template:
+    src: mailname.j2
+    dest: /etc/mailname
+    owner: root
+    group: "{{ root_group }}"
+    mode: '0644'
+  become: true
+  when: ansible_distribution == 'Debian'
+  notify:
+    - Reload postfix
+  tags:
+    - conf
+
+- name: "Be sure postfix is configured"
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/postfix/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items: "{{ postfix_filelist }}"
+  become: true
+  notify:
+    - Reload postfix
+  tags:
+    - conf
+
+# TODO it might be smarter to use the lineinfile module to change the
+# value of the single variable from that file
+# - name: Enable postfix
+#   copy: src=postfix dest=/etc/default/postfix owner=root group=root mode=0644
+#   become: true
+#   notify:
+#     - restart postfix
+#   when: "'{{ ansible_os_family }}' == 'Debian'"
+#   tags: postfix
+
+## Do it only if the file doesn't exist
+#
+- name: "Check if exists : {{ postfix_dhparam_pem }}"
+  ansible.builtin.stat:
+    path: "{{ postfix_dhparam_pem }}"
+  register: stat_result
+
+# FIXME  could be mode : 0400 ?
+- name: "Generate DH Parameters with a different size (4096 bits)"
+  community.crypto.openssl_dhparam:
+    path: "{{ postfix_dhparam_pem }}"
+    owner: root
+    group: "{{ root_group }}"
+    mode: '0444'
+    size: 4096
+  when: not ansible_check_mode and not stat_result.stat.exists
+  async: 0
+  poll: 0
+  become: true
+  notify:
+    - Restart postfix
+  tags:
+    - conf
+
+- name: "Be sure postfix is running and enabled"
+  ansible.builtin.service:
+    name: postfix
+    state: started
+    enabled: true
+  when: not ansible_check_mode
+  become: true
+  tags:
+    - conf

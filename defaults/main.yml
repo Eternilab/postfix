@@ -1,0 +1,15 @@
+# Copyright (C) 2024 Eternilab <support@eternilab.com>
+#
+# SPDX-License-Identifier: CECILL-2.1
+---
+postfix_filelist:
+  - main.cf
+  - master.cf
+postfix_spool_dir: /var/spool/postfix
+postfix_dhparam_pem: /etc/postfix/dhparams.pem
+
+###
+# User variables :
+#
+# postfix_smtp_hostname : mx.domain.tld
+# postfix_mailer_domain: domain.tld

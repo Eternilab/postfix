@@ -1,0 +1,8 @@
+# Copyright (C) 2024 Eternilab <support@eternilab.com>
+#
+# SPDX-License-Identifier: CECILL-2.1
+---
+- name: "Handle postfix role"
+  ansible.builtin.import_tasks: postfix.yml
+  tags:
+    - postfix

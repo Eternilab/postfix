@@ -1,0 +1,15 @@
+# Copyright (C) 2024 Eternilab <support@eternilab.com>
+#
+# SPDX-License-Identifier: CECILL-2.1
+---
+- name: Restart postfix
+  ansible.builtin.service:
+    name: postfix
+    state: restarted
+  become: true
+
+- name: Reload postfix
+  ansible.builtin.service:
+    name: postfix
+    state: reloaded
+  become: true
