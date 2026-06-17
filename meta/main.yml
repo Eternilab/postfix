@@ -1,0 +1,21 @@
+# Copyright (C) 2024 Eternilab <support@eternilab.com>
+#
+# SPDX-License-Identifier: CECILL-2.1
+
+---
+dependencies: []
+
+galaxy_info:
+  role_name: postfix
+  namespace: eternilab
+  author: "gallix@eternilab.com>"
+  description: Configure postfix
+  min_ansible_version: "2.14"
+  company: "Eternilab"
+  license: "MIT"
+  platforms:
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - system
